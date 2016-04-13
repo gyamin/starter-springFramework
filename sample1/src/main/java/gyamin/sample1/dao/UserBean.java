@@ -1,14 +1,11 @@
 package gyamin.sample1.dao;
 
 public class UserBean {
-    private Integer id;
-    private String name;
-
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -19,4 +16,8 @@ public class UserBean {
     public void setName(String name) {
         this.name = name;
     }
+
+    private String id;
+    private String name;
+
 }
