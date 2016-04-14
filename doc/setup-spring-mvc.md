@@ -1,88 +1,94 @@
-# setup spring mvc
+# setup-spring
 
-## Gradle確認
-```
-$ gradle -v
-------------------------------------------------------------
-Gradle 2.12
-------------------------------------------------------------
-```
+## 概要
 
-## 初期ディレクトリ構造の作成
+### プロジェクトディレクトリの作成
 ```
-$ mkdir testapp
-$ cd testapp/
-$ mkdir -p src/main/java/hello
-$ mkdir -p src/main/resources/templates
+$ mkdir sample1
+$ mkdir -p sample1/src/main/java
+$ mkdir -p sample1/src/main/resources
+$ mkdir -p sample1/src/main/webapp
 ```
 
-## Gradle buildファイルの作成
+### mavenの設定
 
 ```
-$ cat build.gradle 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.3.RELEASE")
-    }
-}
+$ cd sample1/
+$ vim pom.xml
+...
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'spring-boot'
-
-jar {
-    baseName = 'gs-serving-web-content'
-    version =  '0.1.0'
-}
-
-repositories {
-    mavenCentral()
-}
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-dependencies {
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.springframework.boot:spring-boot-devtools")
-    testCompile("junit:junit")
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.3'
-}
-```
-
-## build
-```
-$ gradle build
-:compileJava UP-TO-DATE
-:processResources UP-TO-DATE
-:classes UP-TO-DATE
+    <packaging>war</packaging>
+    <groupId>gyamin.sample1</groupId>
+    <artifactId>sample1</artifactId>
+    <version>1.0-SNAPSHOT</version>
 ...
 ```
 
-## Spring Boot ToolでWebサーバを起動する
+### IntelliJ IDEA設定
+Openからsample1ディレクトリを選択してプロジェクトを作成する。       
+
+View > Tool Windows からMavenを選択してMavenToolをプロジェクトに表示する。      
+![画像](./img/snp001_001.png)
+
+Edit Configuration から新規の設定でMavenを選択し、Run/Debug設定を行う。
+![画像](./img/snp001_002.png)
+
+
+### HelloWorldの作成
+
+##### ディレクトリ作成
+```
+$ mkdir -p src/main/webapp/WEB-INF
+$ mkdir -p src/main/webapp/WEB-INF/jsp
+```
+
+##### web.xmlの作成
 
 ```
-$ gradle bootRun
-:compileJava UP-TO-DATE
-:processResources UP-TO-DATE
-:classes UP-TO-DATE
-:findMainClass
-:bootRun
-...
-beans for JMX exposure on startup
-2016-04-05 12:31:54.567  INFO 20414 --- [  restartedMain] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
-2016-04-05 12:31:54.574  INFO 20414 --- [  restartedMain] hello.Application                        : Started Application in 5.383 seconds (JVM running for 6.194)
-> Building 80% > :bootRun
-2016-04-05 13:33:04.669  INFO 20414 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring FrameworkServlet 'dispatcherServlet'
-2016-04-05 13:33:04.671  INFO 20414 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization started
-2016-04-05 13:33:04.711  INFO 20414 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization completed in 40 ms
-> Building 80% > :bootRun
-```
-ブラウザからhttp://localhost:8080/greetingで"Hello World"が表示される。
+$ cat web.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+    <display-name>sample1</display-name>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
 
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+```
+
+##### xxxx-servlet.xmlの作成
+
+```
+$ cat dispatcher-servlet.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+    <context:component-scan base-package="gyamin.sample1.controller" />
+    <bean
+            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+</beans>
+```
